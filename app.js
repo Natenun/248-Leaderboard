@@ -1,7 +1,7 @@
 // ==========================
 // CONFIG
 // ==========================
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkNVaGJvGsFXW3tlLZ8PiM3PPHltGMCVthJszUlJXCsMdM8UMTsb-V2JB2PHs6vuGNju6k_ucLDnEO/pub?gid=923538560&single=true&output=csv";
 
 const MAX_ATHLETES = 30;
 
@@ -9,9 +9,8 @@ const MAX_ATHLETES = 30;
 // ELEMENTOS
 // ==========================
 const els = {
-  boxes: document.getElementById("boxes"),
+  boxes: document.getElementById("boxes"),     // ahora: TOP 3 por box
   tbody: document.getElementById("tbody"),
-  top3: document.getElementById("top3"),
   search: document.getElementById("search"),
   workout: document.getElementById("workout"),
   tableTitle: document.getElementById("tableTitle"),
@@ -89,89 +88,10 @@ function computeModel(r) {
 }
 
 // ==========================
-// RENDER BOXES
-// ==========================
-function renderBoxes(data, view="overall"){
-  const map = new Map();
-
-  data.forEach(a => {
-    const boxName = (a.box || "").trim();
-    if (!boxName) return;
-
-    if (!map.has(boxName)) {
-      map.set(boxName, { name: boxName, logo: a.box_logo, totalPts: 0, athletes: 0 });
-    }
-
-    const item = map.get(boxName);
-    const pts =
-      view === "w1" ? (Number(a.w1Pts) || 0) :
-      view === "w2" ? (Number(a.w2Pts) || 0) :
-      view === "w3" ? (Number(a.w3Pts) || 0) :
-      (Number(a.overallPts) || 0);
-
-    item.totalPts += pts;
-    item.athletes += 1;
-    if (!item.logo && a.box_logo) item.logo = a.box_logo;
-  });
-
-  const boxesSorted = [...map.values()].sort((a,b) => {
-    if (b.totalPts !== a.totalPts) return b.totalPts - a.totalPts;
-    return a.name.localeCompare(b.name);
-  });
-
-  const rankedBoxes = assignCompetitionRanks(boxesSorted, b => b.totalPts);
-
-  const label =
-    view === "w1" ? "W1" : view === "w2" ? "W2" : view === "w3" ? "W3" : "Total";
-
-  els.boxes.innerHTML = rankedBoxes.map((b) => {
-    const medal = b.rank === 1 ? "🥇" : b.rank === 2 ? "🥈" : b.rank === 3 ? "🥉" : "🏁";
-
-    return `
-      <div class="boxChip">
-        <div class="boxMeta">
-          <div class="boxLeft">
-            <div class="boxLogoWrap">
-              <img src="${safeImg(b.logo)}" alt="${escapeHTML(b.name)}"
-                   onerror="this.src='${fallbackAvatar()}'">
-            </div>
-            <div style="min-width:0;">
-              <div class="boxName">${escapeHTML(b.name)}</div>
-              <div class="boxSub">${b.athletes} atletas</div>
-            </div>
-          </div>
-
-          <div class="boxRight">
-            <div class="boxRank">${medal} <strong>#${b.rank}</strong></div>
-            <div class="boxPts">
-              ${b.totalPts} pts
-              <small>${label} del box</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-// ==========================
-// ORDENAMIENTO
-// ==========================
-function sortByView(data, view) {
-  const copy = [...data];
-
-  if (view === "w1") copy.sort((a,b) => b.w1Pts - a.w1Pts);
-  else if (view === "w2") copy.sort((a,b) => b.w2Pts - a.w2Pts);
-  else if (view === "w3") copy.sort((a,b) => b.w3Pts - a.w3Pts);
-  else copy.sort((a,b) => b.overallPts - a.overallPts);
-
-  return copy;
-}
-// ==========================
 // Rank de competencia
 // ==========================
 function assignCompetitionRanks(sorted, getPointsFn) {
-  // Asigna rank tipo competencia: 1,1,3,4...
+  // 1,1,3,4...
   let lastPts = null;
   let lastRank = 0;
 
@@ -188,58 +108,120 @@ function assignCompetitionRanks(sorted, getPointsFn) {
       return { ...item, rank: lastRank };
     }
 
-    // Si no empata, rank = posición real (idx+1)
     lastPts = pts;
     lastRank = idx + 1;
     return { ...item, rank: lastRank };
   });
 }
 
+// ==========================
+// ORDENAMIENTO (tabla general)
+// ==========================
+function sortByView(data, view) {
+  const copy = [...data];
+
+  if (view === "w1") copy.sort((a,b) => b.w1Pts - a.w1Pts);
+  else if (view === "w2") copy.sort((a,b) => b.w2Pts - a.w2Pts);
+  else if (view === "w3") copy.sort((a,b) => b.w3Pts - a.w3Pts);
+  else copy.sort((a,b) => b.overallPts - a.overallPts);
+
+  return copy;
+}
 
 // ==========================
-// RENDER TOP 3
+// TOP 3 POR BOX (nuevo)
 // ==========================
-function renderTop3(sorted, view) {
+function renderTop3ByBox(data, view) {
   const ptsOf = (a) =>
     view === "w1" ? a.w1Pts :
     view === "w2" ? a.w2Pts :
     view === "w3" ? a.w3Pts :
     a.overallPts;
 
-  const ranked = assignCompetitionRanks(sorted, ptsOf);
-  const top = ranked.filter(a => a.rank <= 3);
+  // Agrupar por box
+  const map = new Map();
+  data.forEach(a => {
+    const boxName = (a.box || "").trim();
+    if (!boxName) return;
+    if (!map.has(boxName)) map.set(boxName, { name: boxName, logo: a.box_logo, athletes: [] });
+    const item = map.get(boxName);
+    item.athletes.push(a);
+    if (!item.logo && a.box_logo) item.logo = a.box_logo;
+  });
 
-  els.top3.innerHTML = top.map((a) => {
-    const pts = ptsOf(a);
-    const medal = a.rank === 1 ? "🥇" : a.rank === 2 ? "🥈" : "🥉";
+  // Ordenar boxes por nombre (o cámbialo a tu gusto)
+  const boxes = [...map.values()].sort((x,y) => x.name.localeCompare(y.name));
 
-    const subtitle =
-      view==="w1" ? `W1: #${a.w1_rank} (${a.w1_score})` :
-      view==="w2" ? `W2: #${a.w2_rank} (${a.w2_score})` :
-      view==="w3" ? `W3: #${a.w3_rank} (${a.w3_score})` :
-      `Total: ${a.overallPts} pts`;
+  const viewLabel =
+    view === "w1" ? "W1" :
+    view === "w2" ? "W2" :
+    view === "w3" ? "W3" : "Overall";
+
+  els.boxes.innerHTML = boxes.map((b) => {
+    // ordenar atletas dentro del box por puntos del view
+    const sorted = [...b.athletes].sort((a,c) => {
+      const d = (Number(ptsOf(c)) || 0) - (Number(ptsOf(a)) || 0);
+      if (d !== 0) return d;
+      return (a.name || "").localeCompare(c.name || "");
+    });
+
+    const ranked = assignCompetitionRanks(sorted, ptsOf);
+    const top = ranked.filter(a => a.rank <= 3);
+
+    const podiumHTML = top.map((a) => {
+      const medal = a.rank === 1 ? "🥇" : a.rank === 2 ? "🥈" : "🥉";
+      const pts = ptsOf(a);
+
+      const subtitle =
+        view==="w1" ? `W1: #${a.w1_rank || "-"} (${a.w1_score || "-"})` :
+        view==="w2" ? `W2: #${a.w2_rank || "-"} (${a.w2_score || "-"})` :
+        view==="w3" ? `W3: #${a.w3_rank || "-"} (${a.w3_score || "-"})` :
+        `Total: ${a.overallPts} pts`;
+
+      return `
+        <div class="podiumItem">
+          <div class="podiumMedal">${medal}</div>
+          <div style="min-width:0;">
+            <div class="podiumName">${escapeHTML(a.name)}</div>
+            <div class="podiumSub">${escapeHTML(subtitle)}</div>
+          </div>
+          <div class="podiumPts">
+            ${pts} pts
+            <small>${viewLabel}</small>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // Si un box no tiene atletas (raro), igual se renderiza vacío
+    const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
     return `
       <article class="card">
-        <div class="rankBadge">${medal} <span class="rankNum">#${a.rank}</span></div>
-        <div class="athleteRow">
-          <img class="avatar" src="${safeImg(a.photo_url)}" alt="${escapeHTML(a.name)}"
-               onerror="this.src='${fallbackAvatar()}'">
-          <div>
-            <div class="name">${escapeHTML(a.name)}</div>
-            <div class="box">${escapeHTML(a.box || "")}</div>
+        <div class="boxHead">
+          <div class="boxHeadLeft">
+            <img class="boxLogoSm"
+                 src="${safeImg(b.logo)}"
+                 alt="${escapeHTML(b.name)}"
+                 onerror="this.src='${fallbackAvatar()}'">
+            <div style="min-width:0;">
+              <div class="boxTitle">${escapeHTML(b.name)}</div>
+              <div class="boxMetaSm">${b.athletes.length} atletas</div>
+            </div>
           </div>
-          <div style="margin-left:auto; text-align:right">
-            <div style="font-weight:800">${pts} pts</div>
-            <small>${escapeHTML(subtitle)}</small>
-          </div>
+          <div class="boxMetaSm">${escapeHTML(viewLabel)}</div>
+        </div>
+
+        <div class="podiumList">
+          ${podiumHTML || emptyState}
         </div>
       </article>
     `;
   }).join("");
 }
+
 // ==========================
-// RENDER TABLA
+// RENDER TABLA GENERAL
 // ==========================
 function renderTable(sorted, view, query) {
   const ptsOf = (a) =>
@@ -278,17 +260,17 @@ function renderTable(sorted, view, query) {
             </div>
           </div>
         </td>
-       <td>
-  <div style="display:flex; gap:10px; align-items:center;">
-    <img
-      src="${safeImg(a.box_logo)}"
-      alt="${escapeHTML(a.box || "")}"      
-      style="width:52px;height:52px;border-radius:14px;object-fit:contain;border:1px solid var(--line);background:rgba(255,255,255,.04);padding:5px;"
-      onerror="this.src='${fallbackAvatar()}'"
-    >
-    <div>${escapeHTML(a.box || "")}</div>
-  </div>
-</td>
+        <td>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <img
+              src="${safeImg(a.box_logo)}"
+              alt="${escapeHTML(a.box || "")}"
+              style="width:52px;height:52px;border-radius:14px;object-fit:contain;border:1px solid var(--line);background:rgba(255,255,255,.04);padding:5px;"
+              onerror="this.src='${fallbackAvatar()}'"
+            >
+            <div>${escapeHTML(a.box || "")}</div>
+          </div>
+        </td>
         <td class="right"><strong>${pts}</strong></td>
         <td><small>${escapeHTML(w1)}</small></td>
         <td><small>${escapeHTML(w2)}</small></td>
@@ -307,7 +289,6 @@ async function load() {
   const raw = parseCSV(text);
   rows = raw.map(computeModel);
 
-  renderBoxes(rows, "overall"); // ✅ primera carga
   refresh();
 
   els.lastUpdated.textContent =
@@ -325,13 +306,14 @@ function refresh() {
 
   const sorted = sortByView(rows, view);
 
-  renderBoxes(rows, view);      // ✅ actualiza ranking de boxes según view
-  renderTop3(sorted, view);
+  // NUEVO: top 3 por box
+  renderTop3ByBox(rows, view);
+
+  // tabla general se mantiene
   renderTable(sorted, view, els.search.value);
 }
 
 els.search.addEventListener("input", refresh);
 els.workout.addEventListener("change", refresh);
-
 
 load();
