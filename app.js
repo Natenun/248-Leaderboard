@@ -1,7 +1,7 @@
 // ==========================
 // CONFIG
 // ==========================
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pubhtml?gid=923538560&single=true";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
 
 const MAX_ATHLETES = 30;
 
@@ -308,3 +308,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
