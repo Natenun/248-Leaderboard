@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interboxes Fitness League | Leaderboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <div class="leagueLogo">
+  <img class="leagueLogoImg invert" src="img/branding/ifl-logo.png" alt="Interboxes Fitness League">
+</div>
+    <div>
+      <h1>Interboxes Fitness League</h1>
+      <p class="sub">Leaderboard • 30 atletas • 1º = 30 pts</p>
+    </div>
+  </div>
+
+  <div class="controls">
+  <input id="search" type="search" placeholder="Buscar atleta o box…" />
+  <select id="workout">
+    <option value="overall" selected>Overall</option>
+    <option value="w1">Workout 1</option>
+    <option value="w2">Workout 2</option>
+    <option value="w3">Workout 3</option>
+  </select>
+</div>
+</header>
+
+<main class="container">
+
+  <!-- BOXES -->
+  <section class="boxes" id="boxes"></section>
+
+  <!-- TOP 3 -->
+  <section class="top3" id="top3"></section>
+
+  <!-- TABLA -->
+  <section class="tableCard">
+    <div class="tableHeader">
+      <h2 id="tableTitle">Overall</h2>
+      <div class="hint" id="lastUpdated"></div>
+    </div>
+
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Atleta</th>
+            <th>Box</th>
+            <th class="right">Pts</th>
+            <th>W1</th>
+            <th>W2</th>
+            <th>W3</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  © Interboxes Fitness League
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
