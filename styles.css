@@ -28,11 +28,7 @@ body{
 
 .brand{display:flex; gap:14px; align-items:center}
 
-/* =========================
-   Logo de la liga (header)
-   sin fondo + negativo
-   ========================= */
-
+/* Logo liga */
 .leagueLogo{
   width:64px;
   height:64px;
@@ -92,139 +88,14 @@ select{max-width:180px}
 .container{max-width:980px; margin:0 auto; padding:16px}
 
 /* =========================
-   TEAM STANDINGS (Boxes)
+   TOP 3 POR BOX (grid)
    ========================= */
 
 .boxes{
-  display:flex;
-  gap:12px;
-  overflow:auto;
-  padding:12px 2px 6px;
-}
-
-.boxChip{
-  min-width: 320px;
-  background: rgba(255,255,255,.03);
-  border:1px solid var(--line);
-  border-radius:18px;
-  padding:12px 14px;
-  white-space:nowrap;
-}
-
-.boxMeta{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-}
-
-.boxLeft{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width: 0;
-}
-
-.boxLogoWrap{
-  width:72px;
-  height:72px;
-  border-radius:20px;
-  border:1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  flex: 0 0 auto;
-}
-
-.boxLogoWrap img{
-  width:62px;
-  height:62px;
-  object-fit:contain;
-  display:block;
-}
-
-.boxName{
-  font-weight:900;
-  font-size:15px;
-  line-height:1.1;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.boxSub{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:4px;
-}
-
-.boxRight{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:8px;
-  flex: 0 0 auto;
-}
-
-.boxRank{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:5px 10px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  font-size:12px;
-  color:var(--muted);
-}
-
-.boxRank strong{
-  color:var(--accent);
-}
-
-.boxPts{
-  text-align:right;
-  font-weight:900;
-  font-size:15px;
-}
-
-.boxPts small{
-  display:block;
-  color:var(--muted);
-  font-weight:650;
-  font-size:11px;
-  margin-top:2px;
-}
-
-/* Campeón del box */
-.boxChip:first-child{
-  border:1px solid rgba(255,215,0,.5);
-  background: linear-gradient(
-    135deg,
-    rgba(255,215,0,.12),
-    rgba(255,215,0,.05)
-  );
-}
-
-.boxChip:first-child .boxLogoWrap{
-  width:82px;
-  height:82px;
-}
-
-.boxChip:first-child .boxLogoWrap img{
-  width:70px;
-  height:70px;
-}
-
-/* =========================
-   Top 3
-   ========================= */
-
-.top3{
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap:12px;
-  margin-top:10px;
+  padding:10px 0 6px;
 }
 
 .card{
@@ -234,40 +105,98 @@ select{max-width:180px}
   padding:12px;
 }
 
-.rankBadge{
-  display:inline-flex;
-  gap:8px;
-  align-items:center;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  font-size:12px;
-  color:var(--muted);
-}
-
-.rankNum{
-  color:var(--accent);
-  font-weight:800;
-}
-
-.athleteRow{
+.boxHead{
   display:flex;
-  gap:10px;
   align-items:center;
-  margin-top:10px;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:10px;
 }
 
-.avatar{
-  width:54px;
-  height:54px;
+.boxHeadLeft{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.boxLogoSm{
+  width:44px;
+  height:44px;
   border-radius:14px;
   border:1px solid var(--line);
-  object-fit:cover;
   background: rgba(255,255,255,.06);
+  padding:6px;
+  object-fit:contain;
 }
 
-.name{font-weight:750}
-.box{color:var(--muted); font-size:12px}
+.boxTitle{
+  font-weight:900;
+  font-size:14px;
+  line-height:1.1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width: 220px;
+}
+
+.boxMetaSm{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+
+.podiumList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.podiumItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background: rgba(255,255,255,.02);
+}
+
+.podiumMedal{
+  width:42px;
+  text-align:center;
+  font-size:18px;
+}
+
+.podiumName{
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width: 200px;
+}
+
+.podiumSub{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.podiumPts{
+  margin-left:auto;
+  text-align:right;
+  font-weight:900;
+}
+
+.podiumPts small{
+  display:block;
+  color:var(--muted);
+  font-weight:650;
+  font-size:11px;
+  margin-top:2px;
+}
 
 /* =========================
    Tabla
@@ -340,13 +269,5 @@ tr:hover td{background: rgba(255,255,255,.03)}
   .controls select{
     width:100%;
     flex: 0 0 auto;
-  }
-
-  .top3{
-    grid-template-columns:1fr;
-  }
-
-  .boxChip{
-    min-width: 280px;
   }
 }
