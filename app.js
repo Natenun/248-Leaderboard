@@ -1,7 +1,7 @@
 // ==========================
 // CONFIG
 // ==========================
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkNVaGJvGsFXW3tlLZ8PiM3PPHltGMCVthJszUlJXCsMdM8UMTsb-V2JB2PHs6vuGNju6k_ucLDnEO/pub?gid=923538560&single=true&output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
 
 const MAX_ATHLETES = 30;
 
@@ -332,5 +332,6 @@ function refresh() {
 
 els.search.addEventListener("input", refresh);
 els.workout.addEventListener("change", refresh);
+
 
 load();
