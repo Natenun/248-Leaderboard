@@ -178,26 +178,35 @@ document.addEventListener("DOMContentLoaded", () => {
         const ranked = assignCompetitionRanks(sorted, ptsOf);
         const top = ranked.filter((a) => a.rank <= 3);
 
-        const podiumHTML = top
-          .map((a) => {
-            const medal = a.rank === 1 ? "🥇" : a.rank === 2 ? "🥈" : "🥉";
-            const pts = ptsOf(a);
+        const podiumHTML = top.map((a) => {
+  const medal = a.rank === 1 ? "🥇" : a.rank === 2 ? "🥈" : "🥉";
+  const pts = ptsOf(a);
 
-            return `
-              <div class="podiumItem">
-                <div class="podiumMedal">${medal}</div>
-                <div style="min-width:0;">
-                  <div class="podiumName">${escapeHTML(a.name)}</div>
-                  <div class="podiumSub">${escapeHTML(a.box || "")}</div>
-                </div>
-                <div class="podiumPts">
-                  ${pts} pts
-                  <small>${viewLabel}</small>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
+  return `
+    <div class="podiumItem">
+      <div class="podiumMedal">${medal}</div>
+
+      <img
+        src="${safeImg(a.photo_url)}"
+        alt="${escapeHTML(a.name)}"
+        class="podiumAvatar"
+        onerror="this.src='${fallbackAvatar()}'"
+        referrerpolicy="no-referrer"
+        loading="lazy"
+      >
+
+      <div style="min-width:0;">
+        <div class="podiumName">${escapeHTML(a.name)}</div>
+        <div class="podiumSub">${escapeHTML(a.box || "")}</div>
+      </div>
+
+      <div class="podiumPts">
+        ${pts} pts
+        <small>${viewLabel}</small>
+      </div>
+    </div>
+  `;
+}).join("");
 
         const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
@@ -327,5 +336,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
 
 
