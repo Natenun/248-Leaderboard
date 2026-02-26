@@ -257,7 +257,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return `
           <tr>
             <td><strong>${a.rank}</strong></td>
-            <td>${escapeHTML(a.name)}</td>
+            <td>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <img
+      src="${safeImg(a.photo_url)}"
+      alt="${escapeHTML(a.name)}"
+      style="width:34px;height:34px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
+      onerror="this.src='${fallbackAvatar()}'"
+      referrerpolicy="no-referrer"
+      loading="lazy"
+    >
+    <div style="min-width:0;">
+      <div style="font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">
+        ${escapeHTML(a.name)}
+      </div>
+      <small style="color:var(--muted);">
+        ${escapeHTML(a.athlete_id ? ("ID " + a.athlete_id) : "")}
+      </small>
+    </div>
+  </div>
+</td>
             <td>${escapeHTML(a.box || "")}</td>
             <td class="right"><strong>${pts}</strong></td>
             <td><small>${escapeHTML(w1)}</small></td>
@@ -308,4 +327,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
 
