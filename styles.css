@@ -271,3 +271,11 @@ tr:hover td{background: rgba(255,255,255,.03)}
     flex: 0 0 auto;
   }
 }
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  object-fit:cover;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.04);
+}
