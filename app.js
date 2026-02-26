@@ -3,7 +3,7 @@
 // ==========================
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
 
-const MAX_ATHLETES = 30;
+const MAX_POINTS = 100;
 
 document.addEventListener("DOMContentLoaded", () => {
   const els = {
@@ -21,11 +21,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // UTILIDADES
   // ==========================
   function pointsFromRank(rank) {
-    const r = Number(rank);
-    if (!Number.isFinite(r) || r < 1) return 0;
-    if (r > MAX_ATHLETES) return 0;
-    return MAX_ATHLETES + 1 - r;
-  }
+  const r = Number(rank);
+  if (!Number.isFinite(r) || r < 1) return 0;
+
+  // 1er lugar = 100, 2do = 99, 3ro = 98 ... 100mo = 1, después = 0
+  const pts = (MAX_POINTS + 1) - r;
+  return pts > 0 ? pts : 0;
+}
 
   function escapeHTML(str = "") {
     return String(str).replace(/[&<>"']/g, (s) => ({
@@ -52,18 +54,54 @@ document.addEventListener("DOMContentLoaded", () => {
     return u ? u : fallbackAvatar();
   }
 
-  // Parser simple (como ya lo traías)
+  // Parser simple (nuevo para mas de 100 atletas)
   function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    const headers = lines.shift().split(",").map((h) => h.trim());
+  const rows = [];
+  let row = [];
+  let cur = "";
+  let inQuotes = false;
 
-    return lines.map((line) => {
-      const cols = line.split(",");
-      const obj = {};
-      headers.forEach((h, i) => (obj[h] = (cols[i] ?? "").trim()));
-      return obj;
-    });
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (ch === '"') {
+      if (inQuotes && text[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      row.push(cur);
+      cur = "";
+    } else if (ch === "\n" && !inQuotes) {
+      row.push(cur);
+      rows.push(row);
+      row = [];
+      cur = "";
+    } else {
+      cur += ch;
+    }
   }
+  if (cur.length || row.length) {
+    row.push(cur);
+    rows.push(row);
+  }
+
+  const clean = rows.filter(r => r.some(c => String(c).trim() !== ""));
+  if (clean.length === 0) return [];
+
+  const headers = clean[0].map(h => String(h).trim());
+  return clean.slice(1).map(cols => {
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = String(cols[idx] ?? "").trim();
+    });
+    return obj;
+  });
+}
 
   // ==========================
   // MODELO
@@ -336,6 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
 
 
 
