@@ -230,7 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 background:rgba(255,255,255,.03);
                 border:1px solid var(--line);
               ">
-                <img class="podiumAvatar"
+                <img
+                  class="podiumAvatar"
                   src="${safeImg(a.photo_url)}"
                   alt="${escapeHTML(a.name)}"
                   style="width:70px;height:70px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
@@ -264,7 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
                 <div class="podiumMedal" style="display:flex; align-items:center; justify-content:flex-end;">
-                  <img class="podiumMedalImg"
+                  <img
+                    class="podiumMedalImg"
                     src="${medalSrc}"
                     alt="${a.rank}º"
                     style="width:120px;height:120px;object-fit:contain;"
