@@ -24,9 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function pointsFromRank(rank) {
     const r = Number(rank);
     if (!Number.isFinite(r) || r < 1) return 0;
-
-    // 1er = 100, 2do = 99 ... 100mo = 1, después = 0
-    const pts = MAX_POINTS + 1 - r;
+    const pts = MAX_POINTS + 1 - r; // 1->100, 100->1, 101+->0
     return pts > 0 ? pts : 0;
   }
 
@@ -55,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return u ? u : fallbackAvatar();
   }
 
-  // Parser CSV robusto
+  // CSV robusto
   function parseCSV(text) {
     const out = [];
     let row = [];
@@ -86,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cur += ch;
       }
     }
-
     if (cur.length || row.length) {
       row.push(cur);
       out.push(row);
@@ -134,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Ranking tipo competencia: 1,1,3,4...
+  // Ranking competencia: 1,1,3,4...
   function assignCompetitionRanks(sorted, getPointsFn) {
     let lastPts = null;
     let lastRank = 0;
@@ -212,78 +209,94 @@ document.addEventListener("DOMContentLoaded", () => {
         const ranked = assignCompetitionRanks(sorted, ptsOf);
         const top = ranked.filter((a) => a.rank <= 3);
 
-        const podiumHTML = top
-          .map((a) => {
-            const medalSrc =
-              a.rank === 1 ? "img/branding/1er.png" :
-              a.rank === 2 ? "img/branding/2do.png" :
-                             "img/branding/3er.png";
+        const podiumHTML = top.map((a) => {
+          const medalSrc =
+            a.rank === 1 ? "img/branding/1er.png" :
+            a.rank === 2 ? "img/branding/2do.png" :
+                           "img/branding/3er.png";
 
-            const pts = ptsOf(a);
+          const pts = ptsOf(a);
 
-            // Layout nuevo (medalla grande + info)
-            return `
-              <div class="podiumItem" style="
-                display:grid;
-                grid-template-columns: 120px 1fr;
-                gap:14px;
+          // Layout nuevo: medalla grande detrás + avatar encima + texto al lado
+          return `
+            <div class="podiumItem" style="
+              display:flex;
+              gap:14px;
+              align-items:center;
+            ">
+              <div style="
+                position:relative;
+                width:120px;
+                height:92px;
+                flex:0 0 120px;
+                display:flex;
                 align-items:center;
+                justify-content:center;
               ">
-                <div class="podiumMedal" style="
+                <img
+                  src="${medalSrc}"
+                  alt="${a.rank}º"
+                  style="
+                    position:absolute;
+                    inset:0;
+                    width:120px;
+                    height:92px;
+                    object-fit:contain;
+                    opacity:0.95;
+                    filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+                  "
+                  loading="lazy"
+                >
+                <img
+                  src="${safeImg(a.photo_url)}"
+                  alt="${escapeHTML(a.name)}"
+                  style="
+                    width:64px;
+                    height:64px;
+                    border-radius:18px;
+                    object-fit:cover;
+                    border:1px solid var(--line);
+                    background:rgba(255,255,255,.04);
+                    position:relative;
+                    transform: translateY(10px);
+                  "
+                  onerror="this.src='${fallbackAvatar()}'"
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                >
+              </div>
+
+              <div style="min-width:0; flex:1;">
+                <div style="
+                  font-weight:900;
+                  font-size:16px;
+                  line-height:1.1;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                  white-space:nowrap;
+                ">${escapeHTML(a.name)}</div>
+
+                <div style="
+                  opacity:.8;
+                  margin-top:4px;
+                  overflow:hidden;
+                  text-overflow:ellipsis;
+                  white-space:nowrap;
+                ">${escapeHTML(a.box || "")}</div>
+
+                <div style="
+                  margin-top:8px;
                   display:flex;
-                  align-items:center;
-                  justify-content:center;
+                  align-items:baseline;
+                  gap:10px;
                 ">
-                  <img
-                    src="${medalSrc}"
-                    alt="${a.rank}º"
-                    style="width:120px;height:120px;object-fit:contain;"
-                    loading="lazy"
-                  >
-                </div>
-
-                <div style="display:flex; gap:12px; align-items:center; min-width:0;">
-                  <img
-                    src="${safeImg(a.photo_url)}"
-                    alt="${escapeHTML(a.name)}"
-                    class="podiumAvatar"
-                    style="width:64px;height:64px;border-radius:16px;object-fit:cover;"
-                    onerror="this.src='${fallbackAvatar()}'"
-                    referrerpolicy="no-referrer"
-                    loading="lazy"
-                  >
-
-                  <div style="min-width:0; flex:1;">
-                    <div class="podiumName" style="
-                      font-weight:800;
-                      font-size:16px;
-                      line-height:1.1;
-                      overflow:hidden;
-                      text-overflow:ellipsis;
-                      white-space:nowrap;
-                    ">${escapeHTML(a.name)}</div>
-
-                    <div class="podiumSub" style="
-                      opacity:.8;
-                      overflow:hidden;
-                      text-overflow:ellipsis;
-                      white-space:nowrap;
-                    ">${escapeHTML(a.box || "")}</div>
-                  </div>
-
-                  <div class="podiumPts" style="
-                    text-align:right;
-                    white-space:nowrap;
-                    font-weight:800;
-                  ">
-                    ${pts} pts
-                    <small style="display:block; opacity:.75; font-weight:600;">${viewLabel}</small>
-                  </div>
+                  <div style="font-weight:900;">${pts} pts</div>
+                  <small style="opacity:.75; font-weight:700;">${viewLabel}</small>
                 </div>
               </div>
-            `;
-          })
-          .join("");
+            </div>
+          `;
+        }).join("");
 
         const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
