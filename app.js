@@ -1,7 +1,8 @@
 // ==========================
 // CONFIG
 // ==========================
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTT7xvkCJSgSTq11zBbaqXrxVuz2EV9KkLcXWElt0MbV5lWaaVWgBr4F6mriA3osJfFZ46ZbNq764kP/pub?gid=923538560&single=true&output=csv";
 
 const MAX_POINTS = 100;
 
@@ -24,8 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = Number(rank);
     if (!Number.isFinite(r) || r < 1) return 0;
 
-    // 1er lugar = 100, 2do = 99, 3ro = 98 ... 100mo = 1, después = 0
-    const pts = (MAX_POINTS + 1) - r;
+    // 1er = 100, 2do = 99 ... 100mo = 1, después = 0
+    const pts = MAX_POINTS + 1 - r;
     return pts > 0 ? pts : 0;
   }
 
@@ -54,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return u ? u : fallbackAvatar();
   }
 
-  // Parser simple (nuevo para mas de 100 atletas)
+  // Parser CSV robusto
   function parseCSV(text) {
-    const rows = [];
+    const out = [];
     let row = [];
     let cur = "";
     let inQuotes = false;
@@ -78,27 +79,26 @@ document.addEventListener("DOMContentLoaded", () => {
         cur = "";
       } else if (ch === "\n" && !inQuotes) {
         row.push(cur);
-        rows.push(row);
+        out.push(row);
         row = [];
         cur = "";
       } else {
         cur += ch;
       }
     }
+
     if (cur.length || row.length) {
       row.push(cur);
-      rows.push(row);
+      out.push(row);
     }
 
-    const clean = rows.filter(r => r.some(c => String(c).trim() !== ""));
+    const clean = out.filter((r) => r.some((c) => String(c).trim() !== ""));
     if (clean.length === 0) return [];
 
-    const headers = clean[0].map(h => String(h).trim());
-    return clean.slice(1).map(cols => {
+    const headers = clean[0].map((h) => String(h).trim());
+    return clean.slice(1).map((cols) => {
       const obj = {};
-      headers.forEach((h, idx) => {
-        obj[h] = String(cols[idx] ?? "").trim();
-      });
+      headers.forEach((h, idx) => (obj[h] = String(cols[idx] ?? "").trim()));
       return obj;
     });
   }
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // 1,1,3,4...
+  // Ranking tipo competencia: 1,1,3,4...
   function assignCompetitionRanks(sorted, getPointsFn) {
     let lastPts = null;
     let lastRank = 0;
@@ -161,17 +161,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================
   function sortByView(data, view) {
     const copy = [...data];
-
     if (view === "w1") copy.sort((a, b) => b.w1Pts - a.w1Pts);
     else if (view === "w2") copy.sort((a, b) => b.w2Pts - a.w2Pts);
     else if (view === "w3") copy.sort((a, b) => b.w3Pts - a.w3Pts);
     else copy.sort((a, b) => b.overallPts - a.overallPts);
-
     return copy;
   }
 
   // ==========================
-  // TOP 3 POR BOX (nuevo)
+  // TOP 3 POR BOX
   // ==========================
   function renderTop3ByBox(data, view) {
     if (!els.boxes) return;
@@ -196,9 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!item.logo && a.box_logo) item.logo = a.box_logo;
     });
 
-    const boxes = [...map.values()].sort((x, y) =>
-      x.name.localeCompare(y.name)
-    );
+    const boxes = [...map.values()].sort((x, y) => x.name.localeCompare(y.name));
 
     const viewLabel =
       view === "w1" ? "W1" :
@@ -216,46 +212,78 @@ document.addEventListener("DOMContentLoaded", () => {
         const ranked = assignCompetitionRanks(sorted, ptsOf);
         const top = ranked.filter((a) => a.rank <= 3);
 
-        const podiumHTML = top.map((a) => {
-          const medalSrc =
-            a.rank === 1 ? "img/branding/1er.png" :
-            a.rank === 2 ? "img/branding/2do.png" :
-                           "img/branding/3er.png";
+        const podiumHTML = top
+          .map((a) => {
+            const medalSrc =
+              a.rank === 1 ? "img/branding/1er.png" :
+              a.rank === 2 ? "img/branding/2do.png" :
+                             "img/branding/3er.png";
 
-          const pts = ptsOf(a);
+            const pts = ptsOf(a);
 
-          return `
-            <div class="podiumItem">
-              <div class="podiumMedal">
-                <img
-                  src="${medalSrc}"
-                  alt="${a.rank}º"
-                  style="width:70px;height:70px;object-fit:contain;"
-                  loading="lazy"
-                >
+            // Layout nuevo (medalla grande + info)
+            return `
+              <div class="podiumItem" style="
+                display:grid;
+                grid-template-columns: 120px 1fr;
+                gap:14px;
+                align-items:center;
+              ">
+                <div class="podiumMedal" style="
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                ">
+                  <img
+                    src="${medalSrc}"
+                    alt="${a.rank}º"
+                    style="width:120px;height:120px;object-fit:contain;"
+                    loading="lazy"
+                  >
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; min-width:0;">
+                  <img
+                    src="${safeImg(a.photo_url)}"
+                    alt="${escapeHTML(a.name)}"
+                    class="podiumAvatar"
+                    style="width:64px;height:64px;border-radius:16px;object-fit:cover;"
+                    onerror="this.src='${fallbackAvatar()}'"
+                    referrerpolicy="no-referrer"
+                    loading="lazy"
+                  >
+
+                  <div style="min-width:0; flex:1;">
+                    <div class="podiumName" style="
+                      font-weight:800;
+                      font-size:16px;
+                      line-height:1.1;
+                      overflow:hidden;
+                      text-overflow:ellipsis;
+                      white-space:nowrap;
+                    ">${escapeHTML(a.name)}</div>
+
+                    <div class="podiumSub" style="
+                      opacity:.8;
+                      overflow:hidden;
+                      text-overflow:ellipsis;
+                      white-space:nowrap;
+                    ">${escapeHTML(a.box || "")}</div>
+                  </div>
+
+                  <div class="podiumPts" style="
+                    text-align:right;
+                    white-space:nowrap;
+                    font-weight:800;
+                  ">
+                    ${pts} pts
+                    <small style="display:block; opacity:.75; font-weight:600;">${viewLabel}</small>
+                  </div>
+                </div>
               </div>
-
-              <img
-                src="${safeImg(a.photo_url)}"
-                alt="${escapeHTML(a.name)}"
-                class="podiumAvatar"
-                onerror="this.src='${fallbackAvatar()}'"
-                referrerpolicy="no-referrer"
-                loading="lazy"
-              >
-
-              <div style="min-width:0;">
-                <div class="podiumName">${escapeHTML(a.name)}</div>
-                <div class="podiumSub">${escapeHTML(a.box || "")}</div>
-              </div>
-
-              <div class="podiumPts">
-                ${pts} pts
-                <small>${viewLabel}</small>
-              </div>
-            </div>
-          `;
-        }).join("");
+            `;
+          })
+          .join("");
 
         const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
@@ -301,8 +329,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = (query || "").toLowerCase().trim();
     const filtered = ranked.filter((a) => {
       if (!q) return true;
-      return (a.name || "").toLowerCase().includes(q) ||
-             (a.box || "").toLowerCase().includes(q);
+      return (
+        (a.name || "").toLowerCase().includes(q) ||
+        (a.box || "").toLowerCase().includes(q)
+      );
     });
 
     els.tbody.innerHTML = filtered
@@ -330,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${escapeHTML(a.name)}
                   </div>
                   <small style="color:var(--muted);">
-                    ${escapeHTML(a.athlete_id ? ("ID " + a.athlete_id) : "")}
+                    ${escapeHTML(a.athlete_id ? "ID " + a.athlete_id : "")}
                   </small>
                 </div>
               </div>
@@ -372,7 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
       refresh();
 
       if (els.lastUpdated) {
-        els.lastUpdated.textContent = "Actualizado: " + new Date().toLocaleString();
+        els.lastUpdated.textContent =
+          "Actualizado: " + new Date().toLocaleString();
       }
     } catch (e) {
       console.error(e);
@@ -385,4 +416,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
-
