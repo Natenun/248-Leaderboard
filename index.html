@@ -5,7 +5,49 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Crossfit 248 | Tabla de Liderato</title>
   <link rel="stylesheet" href="styles.css?v=20260225a" />
-  
+
+  <!-- Fix legibilidad en móvil (top 3 por box) -->
+  <style>
+    /* En móvil el badge se come el espacio: lo mandamos abajo y agrandamos texto */
+    @media (max-width: 520px){
+      .podiumItem{ 
+        grid-template-columns: 64px 1fr !important;
+        gap: 12px !important;
+        padding: 12px 12px !important;
+      }
+
+      .podiumAvatar{ width:64px !important; height:64px !important; border-radius:16px !important; }
+
+      .podiumName{ 
+        font-size: 18px !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+
+      .podiumBox{
+        font-size: 14px !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+
+      .podiumScore{
+        grid-column: 2 / 3 !important;
+        text-align: left !important;
+        margin-top: 6px !important;
+      }
+      .podiumPts{ font-size: 16px !important; }
+
+      .podiumMedal{
+        grid-column: 1 / -1 !important;
+        justify-content: flex-start !important;
+        margin-top: 10px !important;
+      }
+      .podiumMedalImg{ width: 96px !important; height: 96px !important; }
+    }
+  </style>
 </head>
 <body>
 
