@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img
                   src="${medalSrc}"
                   alt="${a.rank}º"
-                  style="width:28px;height:28px;object-fit:contain;"
+                  style="width:70px;height:70px;object-fit:contain;"
                   loading="lazy"
                 >
               </div>
@@ -385,3 +385,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
