@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cur += ch;
       }
     }
+
     if (cur.length || row.length) {
       row.push(cur);
       out.push(row);
@@ -166,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==========================
-  // TOP 3 POR BOX
+  // TOP 3 POR BOX (layout bonito)
   // ==========================
   function renderTop3ByBox(data, view) {
     if (!els.boxes) return;
@@ -176,6 +177,11 @@ document.addEventListener("DOMContentLoaded", () => {
       view === "w2" ? a.w2Pts :
       view === "w3" ? a.w3Pts :
       a.overallPts;
+
+    const viewLabel =
+      view === "w1" ? "W1" :
+      view === "w2" ? "W2" :
+      view === "w3" ? "W3" : "Overall";
 
     const map = new Map();
 
@@ -192,11 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const boxes = [...map.values()].sort((x, y) => x.name.localeCompare(y.name));
-
-    const viewLabel =
-      view === "w1" ? "W1" :
-      view === "w2" ? "W2" :
-      view === "w3" ? "W3" : "Overall";
 
     els.boxes.innerHTML = boxes
       .map((b) => {
@@ -217,82 +218,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const pts = ptsOf(a);
 
-          // Layout nuevo: medalla grande detrás + avatar encima + texto al lado
+          // 4 columnas: Medalla | Foto | Texto | Pts
           return `
             <div class="podiumItem" style="
-              display:flex;
+              display:grid;
+              grid-template-columns: 120px 70px 1fr auto;
               gap:14px;
               align-items:center;
+              padding:10px 12px;
+              border-radius:16px;
+              background:rgba(255,255,255,.03);
+              border:1px solid var(--line);
             ">
-              <div style="
-                position:relative;
-                width:120px;
-                height:92px;
-                flex:0 0 120px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-              ">
+              <div style="display:flex; align-items:center; justify-content:center;">
                 <img
                   src="${medalSrc}"
                   alt="${a.rank}º"
-                  style="
-                    position:absolute;
-                    inset:0;
-                    width:120px;
-                    height:92px;
-                    object-fit:contain;
-                    opacity:0.95;
-                    filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
-                  "
-                  loading="lazy"
-                >
-                <img
-                  src="${safeImg(a.photo_url)}"
-                  alt="${escapeHTML(a.name)}"
-                  style="
-                    width:64px;
-                    height:64px;
-                    border-radius:18px;
-                    object-fit:cover;
-                    border:1px solid var(--line);
-                    background:rgba(255,255,255,.04);
-                    position:relative;
-                    transform: translateY(10px);
-                  "
-                  onerror="this.src='${fallbackAvatar()}'"
-                  referrerpolicy="no-referrer"
+                  style="width:120px;height:120px;object-fit:contain;"
                   loading="lazy"
                 >
               </div>
 
-              <div style="min-width:0; flex:1;">
+              <img
+                src="${safeImg(a.photo_url)}"
+                alt="${escapeHTML(a.name)}"
+                style="width:70px;height:70px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
+                onerror="this.src='${fallbackAvatar()}'"
+                referrerpolicy="no-referrer"
+                loading="lazy"
+              >
+
+              <div style="min-width:0;">
                 <div style="
                   font-weight:900;
                   font-size:16px;
-                  line-height:1.1;
+                  line-height:1.15;
                   overflow:hidden;
                   text-overflow:ellipsis;
                   white-space:nowrap;
                 ">${escapeHTML(a.name)}</div>
-
                 <div style="
-                  opacity:.8;
+                  opacity:.78;
                   margin-top:4px;
                   overflow:hidden;
                   text-overflow:ellipsis;
                   white-space:nowrap;
                 ">${escapeHTML(a.box || "")}</div>
+              </div>
 
-                <div style="
-                  margin-top:8px;
-                  display:flex;
-                  align-items:baseline;
-                  gap:10px;
-                ">
-                  <div style="font-weight:900;">${pts} pts</div>
-                  <small style="opacity:.75; font-weight:700;">${viewLabel}</small>
-                </div>
+              <div style="text-align:right; white-space:nowrap;">
+                <div style="font-weight:900; font-size:16px;">${pts} pts</div>
+                <small style="display:block; opacity:.75; font-weight:700;">${viewLabel}</small>
               </div>
             </div>
           `;
@@ -415,8 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
       refresh();
 
       if (els.lastUpdated) {
-        els.lastUpdated.textContent =
-          "Actualizado: " + new Date().toLocaleString();
+        els.lastUpdated.textContent = "Actualizado: " + new Date().toLocaleString();
       }
     } catch (e) {
       console.error(e);
