@@ -220,59 +220,63 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // 4 columnas: Medalla | Foto | Texto | Pts
           return `
-            <div class="podiumItem" style="
-              display:grid;
-              grid-template-columns: 120px 70px 1fr auto;
-              gap:14px;
-              align-items:center;
-              padding:10px 12px;
-              border-radius:16px;
-              background:rgba(255,255,255,.03);
-              border:1px solid var(--line);
-            ">
-              <div style="display:flex; align-items:center; justify-content:center;">
-                <img
-                  src="${medalSrc}"
-                  alt="${a.rank}º"
-                  style="width:120px;height:120px;object-fit:contain;"
-                  loading="lazy"
-                >
-              </div>
+  <div class="podiumItem" style="
+    display:grid;
+    grid-template-columns: 70px 1fr auto 120px;
+    gap:14px;
+    align-items:center;
+    padding:10px 12px;
+    border-radius:16px;
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--line);
+  ">
+    <!-- FOTO -->
+    <img
+      src="${safeImg(a.photo_url)}"
+      alt="${escapeHTML(a.name)}"
+      style="width:70px;height:70px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
+      onerror="this.src='${fallbackAvatar()}'"
+      referrerpolicy="no-referrer"
+      loading="lazy"
+    >
 
-              <img
-                src="${safeImg(a.photo_url)}"
-                alt="${escapeHTML(a.name)}"
-                style="width:70px;height:70px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
-                onerror="this.src='${fallbackAvatar()}'"
-                referrerpolicy="no-referrer"
-                loading="lazy"
-              >
+    <!-- NOMBRE + BOX -->
+    <div style="min-width:0;">
+      <div style="
+        font-weight:900;
+        font-size:16px;
+        line-height:1.15;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      ">${escapeHTML(a.name)}</div>
 
-              <div style="min-width:0;">
-                <div style="
-                  font-weight:900;
-                  font-size:16px;
-                  line-height:1.15;
-                  overflow:hidden;
-                  text-overflow:ellipsis;
-                  white-space:nowrap;
-                ">${escapeHTML(a.name)}</div>
-                <div style="
-                  opacity:.78;
-                  margin-top:4px;
-                  overflow:hidden;
-                  text-overflow:ellipsis;
-                  white-space:nowrap;
-                ">${escapeHTML(a.box || "")}</div>
-              </div>
+      <div style="
+        opacity:.78;
+        margin-top:4px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      ">${escapeHTML(a.box || "")}</div>
+    </div>
 
-              <div style="text-align:right; white-space:nowrap;">
-                <div style="font-weight:900; font-size:16px;">${pts} pts</div>
-                <small style="display:block; opacity:.75; font-weight:700;">${viewLabel}</small>
-              </div>
-            </div>
-          `;
-        }).join("");
+    <!-- PUNTOS -->
+    <div style="text-align:right; white-space:nowrap;">
+      <div style="font-weight:900; font-size:16px;">${pts} pts</div>
+      <small style="display:block; opacity:.75; font-weight:700;">${viewLabel}</small>
+    </div>
+
+    <!-- MEDALLA (DERECHA) -->
+    <div style="display:flex; align-items:center; justify-content:flex-end;">
+      <img
+        src="${medalSrc}"
+        alt="${a.rank}º"
+        style="width:120px;height:120px;object-fit:contain;"
+        loading="lazy"
+      >
+    </div>
+  </div>
+`;
 
         const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
@@ -404,3 +408,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
+
