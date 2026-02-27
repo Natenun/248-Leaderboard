@@ -21,13 +21,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // UTILIDADES
   // ==========================
   function pointsFromRank(rank) {
-  const r = Number(rank);
-  if (!Number.isFinite(r) || r < 1) return 0;
+    const r = Number(rank);
+    if (!Number.isFinite(r) || r < 1) return 0;
 
-  // 1er lugar = 100, 2do = 99, 3ro = 98 ... 100mo = 1, después = 0
-  const pts = (MAX_POINTS + 1) - r;
-  return pts > 0 ? pts : 0;
-}
+    // 1er lugar = 100, 2do = 99, 3ro = 98 ... 100mo = 1, después = 0
+    const pts = (MAX_POINTS + 1) - r;
+    return pts > 0 ? pts : 0;
+  }
 
   function escapeHTML(str = "") {
     return String(str).replace(/[&<>"']/g, (s) => ({
@@ -56,52 +56,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Parser simple (nuevo para mas de 100 atletas)
   function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cur = "";
-  let inQuotes = false;
+    const rows = [];
+    let row = [];
+    let cur = "";
+    let inQuotes = false;
 
-  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
 
-    if (ch === '"') {
-      if (inQuotes && text[i + 1] === '"') {
-        cur += '"';
-        i++;
+      if (ch === '"') {
+        if (inQuotes && text[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === "," && !inQuotes) {
+        row.push(cur);
+        cur = "";
+      } else if (ch === "\n" && !inQuotes) {
+        row.push(cur);
+        rows.push(row);
+        row = [];
+        cur = "";
       } else {
-        inQuotes = !inQuotes;
+        cur += ch;
       }
-    } else if (ch === "," && !inQuotes) {
-      row.push(cur);
-      cur = "";
-    } else if (ch === "\n" && !inQuotes) {
+    }
+    if (cur.length || row.length) {
       row.push(cur);
       rows.push(row);
-      row = [];
-      cur = "";
-    } else {
-      cur += ch;
     }
-  }
-  if (cur.length || row.length) {
-    row.push(cur);
-    rows.push(row);
-  }
 
-  const clean = rows.filter(r => r.some(c => String(c).trim() !== ""));
-  if (clean.length === 0) return [];
+    const clean = rows.filter(r => r.some(c => String(c).trim() !== ""));
+    if (clean.length === 0) return [];
 
-  const headers = clean[0].map(h => String(h).trim());
-  return clean.slice(1).map(cols => {
-    const obj = {};
-    headers.forEach((h, idx) => {
-      obj[h] = String(cols[idx] ?? "").trim();
+    const headers = clean[0].map(h => String(h).trim());
+    return clean.slice(1).map(cols => {
+      const obj = {};
+      headers.forEach((h, idx) => {
+        obj[h] = String(cols[idx] ?? "").trim();
+      });
+      return obj;
     });
-    return obj;
-  });
-}
+  }
 
   // ==========================
   // MODELO
@@ -217,34 +217,45 @@ document.addEventListener("DOMContentLoaded", () => {
         const top = ranked.filter((a) => a.rank <= 3);
 
         const podiumHTML = top.map((a) => {
-  const medal = a.rank === 1 ? "🥇" : a.rank === 2 ? "🥈" : "🥉";
-  const pts = ptsOf(a);
+          const medalSrc =
+            a.rank === 1 ? "img/branding/1er.png" :
+            a.rank === 2 ? "img/branding/2do.png" :
+                           "img/branding/3er.png";
 
-  return `
-    <div class="podiumItem">
-      <div class="podiumMedal">${medal}</div>
+          const pts = ptsOf(a);
 
-      <img
-        src="${safeImg(a.photo_url)}"
-        alt="${escapeHTML(a.name)}"
-        class="podiumAvatar"
-        onerror="this.src='${fallbackAvatar()}'"
-        referrerpolicy="no-referrer"
-        loading="lazy"
-      >
+          return `
+            <div class="podiumItem">
+              <div class="podiumMedal">
+                <img
+                  src="${medalSrc}"
+                  alt="${a.rank}º"
+                  style="width:28px;height:28px;object-fit:contain;"
+                  loading="lazy"
+                >
+              </div>
 
-      <div style="min-width:0;">
-        <div class="podiumName">${escapeHTML(a.name)}</div>
-        <div class="podiumSub">${escapeHTML(a.box || "")}</div>
-      </div>
+              <img
+                src="${safeImg(a.photo_url)}"
+                alt="${escapeHTML(a.name)}"
+                class="podiumAvatar"
+                onerror="this.src='${fallbackAvatar()}'"
+                referrerpolicy="no-referrer"
+                loading="lazy"
+              >
 
-      <div class="podiumPts">
-        ${pts} pts
-        <small>${viewLabel}</small>
-      </div>
-    </div>
-  `;
-}).join("");
+              <div style="min-width:0;">
+                <div class="podiumName">${escapeHTML(a.name)}</div>
+                <div class="podiumSub">${escapeHTML(a.box || "")}</div>
+              </div>
+
+              <div class="podiumPts">
+                ${pts} pts
+                <small>${viewLabel}</small>
+              </div>
+            </div>
+          `;
+        }).join("");
 
         const emptyState = `<div class="podiumSub">Sin atletas</div>`;
 
@@ -305,25 +316,25 @@ document.addEventListener("DOMContentLoaded", () => {
           <tr>
             <td><strong>${a.rank}</strong></td>
             <td>
-  <div style="display:flex; gap:10px; align-items:center;">
-    <img
-      src="${safeImg(a.photo_url)}"
-      alt="${escapeHTML(a.name)}"
-      style="width:34px;height:34px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
-      onerror="this.src='${fallbackAvatar()}'"
-      referrerpolicy="no-referrer"
-      loading="lazy"
-    >
-    <div style="min-width:0;">
-      <div style="font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">
-        ${escapeHTML(a.name)}
-      </div>
-      <small style="color:var(--muted);">
-        ${escapeHTML(a.athlete_id ? ("ID " + a.athlete_id) : "")}
-      </small>
-    </div>
-  </div>
-</td>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <img
+                  src="${safeImg(a.photo_url)}"
+                  alt="${escapeHTML(a.name)}"
+                  style="width:34px;height:34px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:rgba(255,255,255,.04);"
+                  onerror="this.src='${fallbackAvatar()}'"
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                >
+                <div style="min-width:0;">
+                  <div style="font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;">
+                    ${escapeHTML(a.name)}
+                  </div>
+                  <small style="color:var(--muted);">
+                    ${escapeHTML(a.athlete_id ? ("ID " + a.athlete_id) : "")}
+                  </small>
+                </div>
+              </div>
+            </td>
             <td>${escapeHTML(a.box || "")}</td>
             <td class="right"><strong>${pts}</strong></td>
             <td><small>${escapeHTML(w1)}</small></td>
@@ -374,7 +385,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   load();
 });
-
-
-
-
